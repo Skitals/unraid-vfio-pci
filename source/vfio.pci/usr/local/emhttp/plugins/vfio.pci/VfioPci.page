@@ -1,0 +1,13 @@
+Menu="UserPreferences"
+Title="VFIO-PCI Config"
+Icon="file"
+---
+<div id="title">Adjust Grayscale</div>
+
+<script>
+$(function() {
+	if ( typeof caPluginUpdateCheck === "function" ) {
+		caPluginUpdateCheck("dark.theme.plg",{name:"Dark Theme"});
+	}
+});
+</script>
