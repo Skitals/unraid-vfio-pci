@@ -2,7 +2,58 @@ Menu="UserPreferences"
 Title="VFIO-PCI Config"
 Icon="file"
 ---
-<div id="title">Adjust Grayscale</div>
+<style>
+table.vfio thead tr:first-child td{font-size:1.1rem;text-transform:uppercase;letter-spacing:1px;}
+table.vfio thead tr:last-child{border-bottom:1px solid #2b2b2b}
+</style>
+<?php 
+$pci = array();
+exec("sh /usr/local/emhttp/plugins/vfio.pci/scripts/getiommu.sh", $output, $return_var );
+foreach($output as $item) {
+	$iommu = substr($item, 0, 2);
+	$reset = substr($item, +3, 1);
+	$device = substr($item, +5, 7);
+	$id = substr($item, +13,9);
+	$desc = substr($item, +23);
+	$pci["$iommu"]["$device"] = array( "reset" => "$reset", "id" => "$id", "desc" => "$desc" );
+}
+?>
+<form id="vfiopci" onsubmit="return false">
+<table class="vfio">
+<thead>
+<tr><td>IOMMU</td><td>Address</td><td>Reset</td><td>Vendor ID</td><td>Description</td></tr>
+</thead>
+<tbody>
+<?php
+$norepeat = array();
+foreach($pci as $iommu => $address) {
+        foreach($address as $pciaddress => $array) {
+                echo "<tr>";
+		echo "<td>";
+		if (!in_array("$iommu",$norepeat)) {
+			$str = (int)($iommu);
+			echo "Group $str";
+		}
+		echo "</td>";
+        	echo "<td><input type=\"checkbox\" name=\"address\" value=\"$pciaddress\"> $pciaddress</td>";
+        	echo "<td>";
+		if ($pci[$iommu][$pciaddress]['reset'] == "1") {
+			echo "[RESET]";
+		}
+		echo "</td>";
+                echo "<td>" . $pci[$iommu][$pciaddress]['id'] . "</td>";
+                echo "<td>" . $pci[$iommu][$pciaddress]['desc'] . "</td>";
+		echo "</tr>";
+		$norepeat[] = $iommu;
+        }
+}
+?>
+</tbody>
+</table>
+<input type="submit" value="Build vfio-pci.cfg" onclick="buildCfg();"><input type="submit" value="Save">
+</form>
+
+<textarea id="vfio-pci-cfg" disabled></textarea>
 
 <script>
 $(function() {
@@ -10,4 +61,14 @@ $(function() {
 		caPluginUpdateCheck("dark.theme.plg",{name:"Dark Theme"});
 	}
 });
+
+function buildCfg() {
+	var string = "BIND=";
+	var elements = document.getElementById("vfiopci").elements;
+	for (var i = 0, element; element = elements[i++];) {
+		if (element.type === "checkbox"  && element.checked === true)
+        	string = string + element.value + " ";
+	}
+	document.getElementById("vfio-pci-cfg").innerHTML = string.trim();
+}
 </script>
