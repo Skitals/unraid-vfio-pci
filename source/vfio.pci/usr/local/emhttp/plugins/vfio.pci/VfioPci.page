@@ -71,7 +71,7 @@ foreach($pci as $iommu => $address) {
 <script>
 $(function() {
 	if ( typeof caPluginUpdateCheck === "function" ) {
-		caPluginUpdateCheck("dark.theme.plg",{name:"Dark Theme"});
+		caPluginUpdateCheck("vfio.pci.plg",{name:"VFIO-PCI Config"});
 	}
 });
 

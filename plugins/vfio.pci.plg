@@ -3,7 +3,7 @@
 <!ENTITY name "vfio.pci">
 <!ENTITY author "Justin Nolan / Skitals">
 <!ENTITY version "2020.01.15">
-<!ENTITY md5 "9d13614b8bf88f515899980497b26cce">
+<!ENTITY md5 "210ab429dc1e96921bc86cccd39488ef">
 <!ENTITY launch "Settings/VfioPci">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github "Skitals/unraid-vfio-pci">
