@@ -2,15 +2,17 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "vfio.pci">
 <!ENTITY author "Justin Nolan / Skitals">
-<!ENTITY version "2020.01.14">
-<!ENTITY md5 "c4959865a5a4d1d4e902c2b2de7ef4d4">
+<!ENTITY version "2020.01.15">
+<!ENTITY md5 "9d13614b8bf88f515899980497b26cce">
 <!ENTITY launch "Settings/VfioPci">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github "Skitals/unraid-vfio-pci">
 <!ENTITY pluginURL "https://raw.githubusercontent.com/&github;/master/plugins/&name;.plg">
 ]>
-<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="file" min="6.7.0" support="https://forums.unraid.net/topic/86724-plugin-dark-theme-now-in-plugin-format/">
+<PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="microchip" min="6.7.0" support="https://forums.unraid.net/topic/87411-plugin-vfio-pci-config/">
 <CHANGES>
+###2020.01.15
+- First release.
 </CHANGES>
 <FILE Run="/bin/bash">
 <INLINE>
@@ -52,5 +54,5 @@ rm -rf /boot/config/plugins/&name;
 echo ""
 echo "VFIO-PCI Config Removed"
 </INLINE>
-  </FILE>
+</FILE>
 </PLUGIN>

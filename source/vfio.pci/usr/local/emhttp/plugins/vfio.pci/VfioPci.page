@@ -1,12 +1,17 @@
-Menu="UserPreferences"
+Menu="Utilities"
 Title="VFIO-PCI Config"
-Icon="file"
+Icon="microchip"
 ---
 <style>
 table.vfio thead tr:first-child td{font-size:1.1rem;text-transform:uppercase;letter-spacing:1px;}
 table.vfio thead tr:last-child{border-bottom:1px solid #2b2b2b}
+tr.checked { background-color: #c6eac5; color:#000; }
+textarea { width:90%; }
 </style>
 <?php 
+if (is_file("/boot/config/vfio-pci.cfg")) {
+	$file = file_get_contents("/boot/config/vfio-pci.cfg");
+}
 $pci = array();
 exec("sh /usr/local/emhttp/plugins/vfio.pci/scripts/getiommu.sh", $output, $return_var );
 foreach($output as $item) {
@@ -28,14 +33,22 @@ foreach($output as $item) {
 $norepeat = array();
 foreach($pci as $iommu => $address) {
         foreach($address as $pciaddress => $array) {
-                echo "<tr>";
+		if (strpos($file, $pciaddress) !== false) {
+                	echo "<tr class=\"checked\">";
+		} else {
+			echo "<tr>";
+		}
 		echo "<td>";
 		if (!in_array("$iommu",$norepeat)) {
 			$str = (int)($iommu);
 			echo "Group $str";
 		}
 		echo "</td>";
-        	echo "<td><input type=\"checkbox\" name=\"address\" value=\"$pciaddress\"> $pciaddress</td>";
+		if (strpos($file, $pciaddress) !== false) {
+        		echo "<td><input type=\"checkbox\" name=\"address\" value=\"$pciaddress\" checked> $pciaddress</td>";
+		} else {
+			echo "<td><input type=\"checkbox\" name=\"address\" value=\"$pciaddress\"> $pciaddress</td>";
+		}
         	echo "<td>";
 		if ($pci[$iommu][$pciaddress]['reset'] == "1") {
 			echo "[RESET]";
@@ -50,15 +63,23 @@ foreach($pci as $iommu => $address) {
 ?>
 </tbody>
 </table>
-<input type="submit" value="Build vfio-pci.cfg" onclick="buildCfg();"><input type="submit" value="Save">
+<input type="submit" value="Build vfio-pci.cfg" onclick="buildCfg();"><input id="savecfg" type="submit" value="Save" onclick="saveCfg();" disabled><span id="warning"></span>
 </form>
 
-<textarea id="vfio-pci-cfg" disabled></textarea>
+<textarea id="vfio-pci-cfg" disabled><?php echo $file; ?></textarea>
 
 <script>
 $(function() {
 	if ( typeof caPluginUpdateCheck === "function" ) {
 		caPluginUpdateCheck("dark.theme.plg",{name:"Dark Theme"});
+	}
+});
+
+$("input[type='checkbox']").change(function() {
+	if(this.checked) {
+		this.closest('tr').className = "checked";
+	} else {
+		this.closest('tr').className = "";
 	}
 });
 
@@ -69,6 +90,20 @@ function buildCfg() {
 		if (element.type === "checkbox"  && element.checked === true)
         	string = string + element.value + " ";
 	}
-	document.getElementById("vfio-pci-cfg").innerHTML = string.trim();
+	string = string.trim();
+	if (string !== "BIND=") {
+		document.getElementById("vfio-pci-cfg").innerHTML = string;
+		document.getElementById("savecfg").disabled = false;
+		document.getElementById("warning").innerHTML = "<b>WARNING: Changes not saved. Review preview below and hit Save!</b>";
+	}
+}
+
+function saveCfg() {
+	var cfg = document.getElementById("vfio-pci-cfg").innerHTML;
+	$.get( "/plugins/vfio.pci/scripts/save.php", { cfg: cfg } )
+	.done(function( data ) {
+		alert( data );
+		document.getElementById("warning").innerHTML = "<b>ALERT: Changes saved. Reboot to take effect.</b>";
+	});
 }
 </script>
