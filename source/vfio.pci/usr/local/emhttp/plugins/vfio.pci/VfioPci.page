@@ -7,6 +7,7 @@ table.vfio thead tr:first-child td{font-size:1.1rem;text-transform:uppercase;let
 table.vfio thead tr:last-child{border-bottom:1px solid #2b2b2b}
 tr.checked { background-color: #c6eac5; color:#000; }
 textarea { width:90%; }
+div.desc { padding-left:50px; padding-right:50px; padding-bottom:75px; }
 </style>
 <?php 
 if (is_file("/boot/config/vfio-pci.cfg")) {
@@ -23,6 +24,12 @@ foreach($output as $item) {
 	$pci["$iommu"]["$device"] = array( "reset" => "$reset", "id" => "$id", "desc" => "$desc" );
 }
 ?>
+<div class="desc">
+<b>Instructions:</b> Select the devices to add to vfio-pci.cfg. This binds the device, by address, to the vfio-pci driver at startup. Bound devices will be available to pass through to your VMs under "Other PCI Devices" in the Edit VM Form View.
+<br><br>
+<b>Note:</b> If you add/remove/move PCI devices in your server the addresses are likely to change. You will need to update this form (or manually edit /boot/config/vfio-pci.cfg) whenever you make hardware changes.
+</div>
+
 <form id="vfiopci" onsubmit="return false">
 <table class="vfio">
 <thead>
