@@ -93,9 +93,11 @@ function buildCfg() {
 	string = string.trim();
 	if (string !== "BIND=") {
 		document.getElementById("vfio-pci-cfg").innerHTML = string;
+	} else {
+		document.getElementById("vfio-pci-cfg").innerHTML = "";
+	}
 		document.getElementById("savecfg").disabled = false;
 		document.getElementById("warning").innerHTML = "<b>WARNING: Changes not saved. Review preview below and hit Save!</b>";
-	}
 }
 
 function saveCfg() {
