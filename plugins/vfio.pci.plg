@@ -2,8 +2,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "vfio.pci">
 <!ENTITY author "Justin Nolan / Skitals">
-<!ENTITY version "2020.01.15a">
-<!ENTITY md5 "9fc03e164eaab92a0a5b46ec5f3983be">
+<!ENTITY version "2020.01.15b">
+<!ENTITY md5 "3168340668dd49fcceb50f269ff58f96">
 <!ENTITY launch "Settings/VfioPci">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github "Skitals/unraid-vfio-pci">
@@ -11,6 +11,9 @@
 ]>
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="microchip" min="6.7.0" support="https://forums.unraid.net/topic/87411-plugin-vfio-pci-config/">
 <CHANGES>
+###2020.01.15b
+- Fix usb display.
+
 ###2020.01.15a
 - Display usb devices attached to each usb controller.
 

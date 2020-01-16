@@ -83,6 +83,7 @@ foreach($pci as $iommu => $address) {
 				echo $item1;
 				echo "</td></tr>";
 			}
+			unset($output1);
 		}
 		$norepeat[] = $iommu;
         }
