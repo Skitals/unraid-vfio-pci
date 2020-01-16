@@ -5,6 +5,7 @@ Icon="microchip"
 <style>
 table.vfio thead tr:first-child td{font-size:1.1rem;text-transform:uppercase;letter-spacing:1px;}
 table.vfio thead tr:last-child{border-bottom:1px solid #2b2b2b}
+.usb { padding-left:50px; }
 tr.checked { background-color: #c6eac5; color:#000; }
 textarea { width:90%; }
 div.desc { padding-left:50px; padding-right:50px; padding-bottom:75px; }
@@ -13,6 +14,8 @@ div.desc { padding-left:50px; padding-right:50px; padding-bottom:75px; }
 if (is_file("/boot/config/vfio-pci.cfg")) {
 	$file = file_get_contents("/boot/config/vfio-pci.cfg");
 }
+
+
 $pci = array();
 exec("sh /usr/local/emhttp/plugins/vfio.pci/scripts/getiommu.sh", $output, $return_var );
 foreach($output as $item) {
@@ -33,7 +36,7 @@ foreach($output as $item) {
 <form id="vfiopci" onsubmit="return false">
 <table class="vfio">
 <thead>
-<tr><td>IOMMU</td><td>Address</td><td>Reset</td><td>Vendor ID</td><td>Description</td></tr>
+<tr><td>IOMMU</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Address</td><td>Reset</td><td>Vendor ID</td><td>Description</td></tr>
 </thead>
 <tbody>
 <?php
@@ -64,6 +67,23 @@ foreach($pci as $iommu => $address) {
                 echo "<td>" . $pci[$iommu][$pciaddress]['id'] . "</td>";
                 echo "<td>" . $pci[$iommu][$pciaddress]['desc'] . "</td>";
 		echo "</tr>";
+		if (strpos($pci[$iommu][$pciaddress]['desc'], 'USB') !== false) {
+			if (strpos($file, $pciaddress) !== false) {
+				echo "<tr><td></td><td></td><td></td><td></td><td class=\"usb\">";
+				echo "*USB devices attached to controllers bound to vfio are not visible to unRAID*";
+				echo "</td></tr>";
+			} else {
+				echo "<tr><td></td><td></td><td></td><td></td><td class=\"usb\">";
+				echo "USB devices attached to this controller:";
+				echo "</td></tr>";
+			}
+			exec("sh /usr/local/emhttp/plugins/vfio.pci/scripts/getusb.sh $pciaddress", $output1, $return_var1);
+			foreach($output1 as $item1) {
+				echo "<tr><td></td><td></td><td></td><td></td><td class=\"usb\">";
+				echo $item1;
+				echo "</td></tr>";
+			}
+		}
 		$norepeat[] = $iommu;
         }
 }
