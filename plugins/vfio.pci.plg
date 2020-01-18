@@ -2,8 +2,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "vfio.pci">
 <!ENTITY author "Justin Nolan / Skitals">
-<!ENTITY version "2020.01.15b">
-<!ENTITY md5 "3168340668dd49fcceb50f269ff58f96">
+<!ENTITY version "2020.01.18">
+<!ENTITY md5 "ef8637a808b62e889861f0f3397d8ed7">
 <!ENTITY launch "Settings/VfioPci">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github "Skitals/unraid-vfio-pci">
@@ -11,6 +11,10 @@
 ]>
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="microchip" min="6.7.0" support="https://forums.unraid.net/topic/87411-plugin-vfio-pci-config/">
 <CHANGES>
+###2020.01.18
+- Implemented Reboot Notification API from Community Applications 2020.01.18+
+- Added Undo option usable before reboot.
+
 ###2020.01.15b
 - Fix usb display.
 

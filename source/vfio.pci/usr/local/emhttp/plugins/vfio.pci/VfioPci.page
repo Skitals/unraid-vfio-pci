@@ -11,10 +11,17 @@ textarea { width:90%; }
 div.desc { padding-left:50px; padding-right:50px; padding-bottom:75px; }
 </style>
 <?php 
+
 if (is_file("/boot/config/vfio-pci.cfg")) {
 	$file = file_get_contents("/boot/config/vfio-pci.cfg");
 }
 
+if (is_file("/tmp/reboot_notifications")) {
+        $file2 = file_get_contents("/tmp/reboot_notifications");
+	if (strpos($file2, "VFIO-PCI Config") !== false) {
+		$reboottrue = 1;
+	}
+}
 
 $pci = array();
 exec("sh /usr/local/emhttp/plugins/vfio.pci/scripts/getiommu.sh", $output, $return_var );
@@ -26,11 +33,14 @@ foreach($output as $item) {
 	$desc = substr($item, +23);
 	$pci["$iommu"]["$device"] = array( "reset" => "$reset", "id" => "$id", "desc" => "$desc" );
 }
+
 ?>
 <div class="desc">
-<b>Instructions:</b> Select the devices to add to vfio-pci.cfg. This binds the device, by address, to the vfio-pci driver at startup. Bound devices will be available to pass through to your VMs under "Other PCI Devices" in the Edit VM Form View.
+<b>Instructions:</b> Select the devices to add to vfio-pci.cfg. This binds the device, by address, to the vfio-pci driver at startup. Bound devices will be available to pass through to your VMs under "Other PCI Devices" in the Edit VM Form View (except for Sound Cards and Graphics Cards, which will still be listed under their corresponding drop-down).
 <br><br>
 <b>Note:</b> If you add/remove/move PCI devices in your server the addresses are likely to change. You will need to update this form (or manually edit /boot/config/vfio-pci.cfg) whenever you make hardware changes.
+<br><br>
+<b>Note:</b> This method of binding binds everything in the IOMMU group. For example, if an IOMMU group contains 3 devices and you only select one, all 3 devices will be bound to vfio. 
 </div>
 
 <form id="vfiopci" onsubmit="return false">
@@ -91,7 +101,7 @@ foreach($pci as $iommu => $address) {
 ?>
 </tbody>
 </table>
-<input type="submit" value="Build vfio-pci.cfg" onclick="buildCfg();"><input id="savecfg" type="submit" value="Save" onclick="saveCfg();" disabled><span id="warning"></span>
+<input id="buildcfg" type="submit" value="Build vfio-pci.cfg" onclick="buildCfg();" <?php if ($reboottrue) { echo "disabled"; } ?>><input id="savecfg" type="submit" value="Save" onclick="saveCfg();" disabled><input id="undocfg" type="submit" value="Undo" onclick="undoCfg();" <?php if (!$reboottrue) { echo "disabled"; } ?>><span id="warning"></span>
 </form>
 
 <textarea id="vfio-pci-cfg" disabled><?php echo $file; ?></textarea>
@@ -130,10 +140,28 @@ function buildCfg() {
 
 function saveCfg() {
 	var cfg = document.getElementById("vfio-pci-cfg").innerHTML;
-	$.get( "/plugins/vfio.pci/scripts/save.php", { cfg: cfg } )
+	if (typeof addRebootNotice === "function") { var careboot = "yes"; } else { var careboot = "no"; }
+	$.get( "/plugins/vfio.pci/scripts/save.php", { cfg: cfg, careboot: careboot } )
 	.done(function( data ) {
 		alert( data );
 		document.getElementById("warning").innerHTML = "<b>ALERT: Changes saved. Reboot to take effect.</b>";
+		if (typeof addRebootNotice === "function") {
+			addRebootNotice("VFIO-PCI Config: A Reboot Is Required For Changes To Take Effect");
+		} else {
+			if (typeof addBannerWarning === "function") {
+				addBannerWarning("A Reboot Is Required For Changes To Take Effect");
+			}
+		}
+		document.getElementById("savecfg").disabled = true;
+		document.getElementById("buildcfg").disabled = true;
+		document.getElementById("undocfg").disabled = false;
 	});
+}
+
+function undoCfg() {
+        $.get( "/plugins/vfio.pci/scripts/undo.php", { } )
+        .done(function( data ) {
+		location.reload();
+        });
 }
 </script>
