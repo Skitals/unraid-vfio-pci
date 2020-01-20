@@ -2,7 +2,7 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "vfio.pci">
 <!ENTITY author "Justin Nolan / Skitals">
-<!ENTITY version "2020.01.19">
+<!ENTITY version "2020.01.20">
 <!ENTITY md5 "3b7796a32d17c3286e95bf3c287055cf">
 <!ENTITY launch "Settings/VfioPci">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
@@ -11,7 +11,7 @@
 ]>
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="microchip" min="6.7.0" support="https://forums.unraid.net/topic/87411-plugin-vfio-pci-config/">
 <CHANGES>
-###2020.01.19
+###2020.01.20
 - Now shows if a device is currently bound to the vfio-pci driver.
 
 ###2020.01.18
