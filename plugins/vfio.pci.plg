@@ -2,8 +2,8 @@
 <!DOCTYPE PLUGIN [
 <!ENTITY name "vfio.pci">
 <!ENTITY author "Justin Nolan / Skitals">
-<!ENTITY version "2020.01.18">
-<!ENTITY md5 "ef8637a808b62e889861f0f3397d8ed7">
+<!ENTITY version "2020.01.19">
+<!ENTITY md5 "3b7796a32d17c3286e95bf3c287055cf">
 <!ENTITY launch "Settings/VfioPci">
 <!ENTITY plugdir "/usr/local/emhttp/plugins/&name;">
 <!ENTITY github "Skitals/unraid-vfio-pci">
@@ -11,6 +11,9 @@
 ]>
 <PLUGIN name="&name;" author="&author;" version="&version;" launch="&launch;" pluginURL="&pluginURL;" icon="microchip" min="6.7.0" support="https://forums.unraid.net/topic/87411-plugin-vfio-pci-config/">
 <CHANGES>
+###2020.01.19
+- Now shows if a device is currently bound to the vfio-pci driver.
+
 ###2020.01.18
 - Implemented Reboot Notification API from Community Applications 2020.01.18+
 - Added Undo option usable before reboot.
@@ -45,7 +48,7 @@ The 'post-install' script
 echo ""
 echo "----------------------------------------------------"
 echo " &name; has been installed."
-echo " Copyright 2019, Justin Nolan"
+echo " Copyright 2020, Justin Nolan"
 echo " Version: &version;"
 echo "----------------------------------------------------"
 echo ""

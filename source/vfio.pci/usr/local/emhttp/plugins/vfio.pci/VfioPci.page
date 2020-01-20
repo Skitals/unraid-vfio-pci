@@ -7,6 +7,7 @@ table.vfio thead tr:first-child td{font-size:1.1rem;text-transform:uppercase;let
 table.vfio thead tr:last-child{border-bottom:1px solid #2b2b2b}
 .usb { padding-left:50px; }
 tr.checked { background-color: #c6eac5; color:#000; }
+tr.iommu { background-color: #B2D2B1; color:#000; }
 textarea { width:90%; }
 div.desc { padding-left:50px; padding-right:50px; padding-bottom:75px; }
 </style>
@@ -33,8 +34,22 @@ foreach($output as $item) {
 	$desc = substr($item, +23);
 	$pci["$iommu"]["$device"] = array( "reset" => "$reset", "id" => "$id", "desc" => "$desc" );
 }
-
+/*
+$iommumatch = array();
+preg_match_all('/\S\S:\S\S.\S/', $file, $matches);
+foreach($matches[0] as $pciaddress) {
+	foreach($pci as $iommu => $array){
+		foreach($array as $key=>$value){
+			if ($pciaddress == $key) {
+				$iommumatch[] = $iommu;
+				$pci["$iommu"]["$pciaddress"]["bound"] = "true";
+			}
+		}
+	}	
+}
+*/
 ?>
+
 <div class="desc">
 <b>Instructions:</b> Select the devices to add to vfio-pci.cfg. This binds the device, by address, to the vfio-pci driver at startup. Bound devices will be available to pass through to your VMs under "Other PCI Devices" in the Edit VM Form View (except for Sound Cards and Graphics Cards, which will still be listed under their corresponding drop-down).
 <br><br>
@@ -46,32 +61,42 @@ foreach($output as $item) {
 <form id="vfiopci" onsubmit="return false">
 <table class="vfio">
 <thead>
-<tr><td>IOMMU</td><td>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Address</td><td>Reset</td><td>Vendor ID</td><td>Description</td></tr>
+<tr><td width="100">IOMMU</td><td width="100">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Address</td><td width="50">Bound</td><td width="50">Reset</td><td width="100">Vendor ID</td><td>Description</td></tr>
 </thead>
 <tbody>
 <?php
 $norepeat = array();
 foreach($pci as $iommu => $address) {
         foreach($address as $pciaddress => $array) {
+		$str = (int)($iommu);
 		if (strpos($file, $pciaddress) !== false) {
                 	echo "<tr class=\"checked\">";
-		} else {
+		} /* elseif (in_array($str, $iommumatch)) {
+			echo "<tr class=\"iommu\">";
+		} */ else {
 			echo "<tr>";
 		}
 		echo "<td>";
 		if (!in_array("$iommu",$norepeat)) {
-			$str = (int)($iommu);
+			
 			echo "Group $str";
 		}
 		echo "</td>";
 		if (strpos($file, $pciaddress) !== false) {
-        		echo "<td><input type=\"checkbox\" name=\"address\" value=\"$pciaddress\" checked> $pciaddress</td>";
+        		echo "<td><input type=\"checkbox\" name=\"address\" value=\"$pciaddress\" checked> $pciaddress";
 		} else {
-			echo "<td><input type=\"checkbox\" name=\"address\" value=\"$pciaddress\"> $pciaddress</td>";
+			echo "<td><input type=\"checkbox\" name=\"address\" value=\"$pciaddress\"> $pciaddress";
 		}
+		echo "</td><td>";
+		exec("lspci -v -s $pciaddress", $outputvfio, $return_varvfio);
+		if (preg_grep("/vfio-pci/i", $outputvfio)) {
+			echo " <i class=\"fa fa-circle orb green-orb middle\" title=\"Kernel driver in use: vfio-pci\"></i>";
+		}
+		unset($outputvfio);
+		echo "</td>";
         	echo "<td>";
 		if ($pci[$iommu][$pciaddress]['reset'] == "1") {
-			echo "[RESET]";
+			echo "<i class=\"fa fa-retweet grey-orb middle\" title=\"RESET Capable\"></i>";
 		}
 		echo "</td>";
                 echo "<td>" . $pci[$iommu][$pciaddress]['id'] . "</td>";
@@ -79,17 +104,17 @@ foreach($pci as $iommu => $address) {
 		echo "</tr>";
 		if (strpos($pci[$iommu][$pciaddress]['desc'], 'USB') !== false) {
 			if (strpos($file, $pciaddress) !== false) {
-				echo "<tr><td></td><td></td><td></td><td></td><td class=\"usb\">";
+				echo "<tr><td></td><td></td><td></td><td></td><td></td><td class=\"usb\">";
 				echo "*USB devices attached to controllers bound to vfio are not visible to unRAID*";
 				echo "</td></tr>";
 			} else {
-				echo "<tr><td></td><td></td><td></td><td></td><td class=\"usb\">";
+				echo "<tr><td></td><td></td><td></td><td></td><td></td><td class=\"usb\">";
 				echo "USB devices attached to this controller:";
 				echo "</td></tr>";
 			}
 			exec("sh /usr/local/emhttp/plugins/vfio.pci/scripts/getusb.sh $pciaddress", $output1, $return_var1);
 			foreach($output1 as $item1) {
-				echo "<tr><td></td><td></td><td></td><td></td><td class=\"usb\">";
+				echo "<tr><td></td><td></td><td></td><td></td><td></td><td class=\"usb\">";
 				echo $item1;
 				echo "</td></tr>";
 			}
@@ -159,7 +184,13 @@ function saveCfg() {
 }
 
 function undoCfg() {
-        $.get( "/plugins/vfio.pci/scripts/undo.php", { } )
+	if (typeof removeRebootNotice === "function") {
+		removeRebootNotice("VFIO-PCI Config: A Reboot Is Required For Changes To Take Effect");
+		var sedremove = "false";
+	} else {
+  		var sedremove = "true";
+	}
+        $.get( "/plugins/vfio.pci/scripts/undo.php", { sed: sedremove } )
         .done(function( data ) {
 		location.reload();
         });
