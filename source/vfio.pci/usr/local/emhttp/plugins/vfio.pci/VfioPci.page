@@ -91,6 +91,7 @@ foreach($pci as $iommu => $address) {
 		exec("lspci -v -s $pciaddress", $outputvfio, $return_varvfio);
 		if (preg_grep("/vfio-pci/i", $outputvfio)) {
 			echo " <i class=\"fa fa-circle orb green-orb middle\" title=\"Kernel driver in use: vfio-pci\"></i>";
+			$isbound = "true";
 		}
 		unset($outputvfio);
 		echo "</td>";
@@ -103,7 +104,7 @@ foreach($pci as $iommu => $address) {
                 echo "<td>" . $pci[$iommu][$pciaddress]['desc'] . "</td>";
 		echo "</tr>";
 		if (strpos($pci[$iommu][$pciaddress]['desc'], 'USB') !== false) {
-			if (strpos($file, $pciaddress) !== false) {
+			if ($isbound) {
 				echo "<tr><td></td><td></td><td></td><td></td><td></td><td class=\"usb\">";
 				echo "*USB devices attached to controllers bound to vfio are not visible to unRAID*";
 				echo "</td></tr>";
@@ -120,6 +121,7 @@ foreach($pci as $iommu => $address) {
 			}
 			unset($output1);
 		}
+		unset($isbound);
 		$norepeat[] = $iommu;
         }
 }
